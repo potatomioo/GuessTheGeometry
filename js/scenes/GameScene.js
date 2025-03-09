@@ -29,7 +29,7 @@ class GameScene extends Phaser.Scene {
         // Create conveyor belt
         this.createConveyorBelt();
         
-        // Create baskets
+        // Create baskets - now all in one row at the bottom
         this.createBaskets();
         
         // Set up input handlers
@@ -97,10 +97,15 @@ class GameScene extends Phaser.Scene {
     }
     
     createHUD() {
+        // Create a semi-transparent panel for HUD elements
+        const hudPanel = this.add.rectangle(10, 70, 160, 120, 0x000000, 0.5)
+            .setOrigin(0, 0.5)
+            .setStrokeStyle(1, 0xffffff);
+        
         // Level indicator
         this.levelText = this.add.text(
-            20, 
-            20, 
+            hudPanel.x + 10, 
+            hudPanel.y - 40, 
             `Level: ${GAME_STATE.currentLevel}`, 
             { 
                 fontFamily: 'Arial',
@@ -108,14 +113,14 @@ class GameScene extends Phaser.Scene {
                 fontStyle: 'bold',
                 color: '#ffffff',
                 stroke: '#000000',
-                strokeThickness: 4
+                strokeThickness: 2
             }
-        );
+        ).setOrigin(0, 0.5);
         
         // Score display
         this.scoreText = this.add.text(
-            20, 
-            60, 
+            hudPanel.x + 10, 
+            hudPanel.y, 
             `Score: ${GAME_STATE.score}`, 
             { 
                 fontFamily: 'Arial',
@@ -123,15 +128,15 @@ class GameScene extends Phaser.Scene {
                 fontStyle: 'bold',
                 color: '#ffffff',
                 stroke: '#000000',
-                strokeThickness: 4
+                strokeThickness: 2
             }
-        );
+        ).setOrigin(0, 0.5);
         
         // Shapes remaining counter
         const shapesRemaining = GAME_STATE.shapesPerLevel - GAME_STATE.shapesProcessed;
         this.shapesRemainingText = this.add.text(
-            20, 
-            100, 
+            hudPanel.x + 10, 
+            hudPanel.y + 40, 
             `Shapes: ${shapesRemaining}`, 
             { 
                 fontFamily: 'Arial',
@@ -139,9 +144,9 @@ class GameScene extends Phaser.Scene {
                 fontStyle: 'bold',
                 color: '#ffffff',
                 stroke: '#000000',
-                strokeThickness: 4
+                strokeThickness: 2
             }
-        );
+        ).setOrigin(0, 0.5);
     }
     
     updateShapesRemainingText() {
@@ -166,42 +171,42 @@ class GameScene extends Phaser.Scene {
     
     createBaskets() {
         const basketTypes = SHAPE_TYPES;
-        const basketPositions = [
-            { x: 120, y: 150 },  // Top left
-            { x: CONFIG.width - 120, y: 150 },  // Top right
-            { x: 120, y: CONFIG.height - 150 },  // Bottom left
-            { x: CONFIG.width - 120, y: CONFIG.height - 150 }  // Bottom right
-        ];
+        const basketCount = basketTypes.length;
+        const basketSpacing = CONFIG.width / (basketCount + 1);
+        
+        // All baskets will now be in a row at the bottom of the screen
+        const basketY = CONFIG.height - 100; // Fixed Y position for all baskets
         
         for (let i = 0; i < basketTypes.length; i++) {
             const type = basketTypes[i];
-            const pos = basketPositions[i];
+            // Calculate X position to space baskets evenly across the bottom
+            const basketX = basketSpacing * (i + 1);
             
             // Create basket shadow
-            this.add.image(pos.x + 5, pos.y + 5, 'basket')
+            this.add.image(basketX + 5, basketY + 5, 'basket')
                 .setTint(0x000000)
                 .setAlpha(0.3);
             
             // Create the basket
-            const basket = this.add.image(pos.x, pos.y, 'basket');
+            const basket = this.add.image(basketX, basketY, 'basket');
             
             // Store basket properties for collision
-            basket.x = pos.x;
-            basket.y = pos.y;
+            basket.x = basketX;
+            basket.y = basketY;
             basket.shapeType = type;
             this.baskets.push(basket);
             
             // Add shape example in the basket
             const exampleShape = this.add.image(
-                pos.x, 
-                pos.y - 20, 
+                basketX, 
+                basketY - 20, 
                 `shape_${type}`
             ).setTint(0xffffff).setAlpha(0.5).setScale(0.8);
             
             // Add label
             this.add.text(
-                pos.x,
-                pos.y + 25,
+                basketX,
+                basketY + 25,
                 type.charAt(0).toUpperCase() + type.slice(1),
                 {
                     fontFamily: 'Arial',
