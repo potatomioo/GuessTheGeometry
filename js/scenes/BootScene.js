@@ -19,7 +19,7 @@ class BootScene extends Phaser.Scene {
         this.add.text(
             CONFIG.width / 2,
             CONFIG.height / 2 - 150,
-            'Shape Sorter',
+            'Guess The Geometry',
             {
                 font: 'bold 48px Arial',
                 fill: '#ffffff',

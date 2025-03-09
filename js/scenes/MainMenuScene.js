@@ -7,11 +7,22 @@ class MainMenuScene extends Phaser.Scene {
         // Add background
         this.add.image(0, 0, 'background').setOrigin(0);
         
+        // Define title area - a safe zone where shapes won't appear
+        const titleSafeZone = {
+            x: CONFIG.width / 2 - 300,
+            y: 80,
+            width: 600,
+            height: 150
+        };
+        
+        // Add decorative shapes first (behind title)
+        this.addDecorativeShapes(titleSafeZone);
+        
         // Add game title with shadow
         const titleShadow = this.add.text(
             CONFIG.width / 2 + 4, 
             120 + 4, 
-            'Shape Sorter', 
+            'Guess The Geometry', 
             { 
                 fontFamily: 'Arial',
                 fontSize: '64px',
@@ -24,7 +35,7 @@ class MainMenuScene extends Phaser.Scene {
         const title = this.add.text(
             CONFIG.width / 2, 
             120, 
-            'Shape Sorter', 
+            'Guess The Geometry', 
             { 
                 fontFamily: 'Arial',
                 fontSize: '64px',
@@ -43,7 +54,7 @@ class MainMenuScene extends Phaser.Scene {
             'Sort the shapes by dragging them to the matching baskets!', 
             { 
                 fontFamily: 'Arial',
-                fontSize: '18px',
+                fontSize: '22px',
                 color: '#ffffff',
                 stroke: '#000000',
                 strokeThickness: 3,
@@ -64,31 +75,38 @@ class MainMenuScene extends Phaser.Scene {
         );
         
         // Add instructions
-        const instructions = [
+        this.add.text(
+            CONFIG.width / 2,
+            380,
             "HOW TO PLAY:",
+            { 
+                fontFamily: 'Arial',
+                fontSize: '28px',
+                fontStyle: 'bold',
+                color: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 3
+            }
+        ).setOrigin(0.5);
+        
+        const instructions = [
             "1. Drag shapes to their matching baskets",
             "2. Score points for correct matches",
             "3. Complete all 3 levels to win",
             "4. Each level gets faster!"
         ];
         
-        let yPos = 380;
-        instructions.forEach((line, index) => {
-            const style = {
+        let yPos = 430;
+        instructions.forEach(line => {
+            this.add.text(CONFIG.width / 2, yPos, line, {
                 fontFamily: 'Arial',
-                fontSize: index === 0 ? '22px' : '18px',
-                fontStyle: index === 0 ? 'bold' : 'normal',
+                fontSize: '22px',
                 color: '#ffffff',
                 stroke: '#000000',
-                strokeThickness: 3
-            };
-            
-            this.add.text(CONFIG.width / 2, yPos, line, style).setOrigin(0.5);
-            yPos += 30;
+                strokeThickness: 2
+            }).setOrigin(0.5);
+            yPos += 35;
         });
-        
-        // Add decorative shapes
-        this.addDecorativeShapes();
         
         // Start background music if available
         this.startBackgroundMusic();
@@ -115,7 +133,7 @@ class MainMenuScene extends Phaser.Scene {
             text, 
             { 
                 fontFamily: 'Arial',
-                fontSize: '24px',
+                fontSize: '28px',
                 fontStyle: 'bold',
                 color: '#ffffff',
                 align: 'center'
@@ -139,7 +157,7 @@ class MainMenuScene extends Phaser.Scene {
         return { button, buttonText };
     }
     
-    addDecorativeShapes() {
+    addDecorativeShapes(titleSafeZone) {
         // Add some shapes around the menu for decoration
         const shapes = ['shape_circle', 'shape_triangle', 'shape_square', 'shape_rectangle'];
         const colors = SHAPE_COLORS;
@@ -149,24 +167,44 @@ class MainMenuScene extends Phaser.Scene {
             const shape = shapes[Math.floor(Math.random() * shapes.length)];
             const color = colors[Math.floor(Math.random() * colors.length)];
             
-            // Position along the edges
+            // Position the shape, avoiding the title safe zone
             let x, y;
-            if (i < 3) {
-                // Top edge
-                x = 100 + Math.random() * (CONFIG.width - 200);
-                y = 50 + Math.random() * 50;
-            } else if (i < 6) {
-                // Right edge
-                x = CONFIG.width - 50 - Math.random() * 50;
-                y = 100 + Math.random() * (CONFIG.height - 200);
-            } else if (i < 9) {
-                // Bottom edge
-                x = 100 + Math.random() * (CONFIG.width - 200);
-                y = CONFIG.height - 50 - Math.random() * 50;
-            } else {
-                // Left edge
-                x = 50 + Math.random() * 50;
-                y = 100 + Math.random() * (CONFIG.height - 200);
+            let isInSafeZone = true;
+            
+            // Keep generating positions until we find one outside the safe zone
+            while (isInSafeZone) {
+                if (i < 4) {
+                    // Top edge
+                    x = Phaser.Math.Between(50, CONFIG.width - 50);
+                    y = Phaser.Math.Between(50, CONFIG.height / 4);
+                } else if (i < 8) {
+                    // Bottom edge
+                    x = Phaser.Math.Between(50, CONFIG.width - 50);
+                    y = Phaser.Math.Between(CONFIG.height * 3/4, CONFIG.height - 50);
+                } else {
+                    // Sides
+                    if (Math.random() > 0.5) {
+                        // Left side
+                        x = Phaser.Math.Between(50, CONFIG.width / 4);
+                    } else {
+                        // Right side
+                        x = Phaser.Math.Between(CONFIG.width * 3/4, CONFIG.width - 50);
+                    }
+                    y = Phaser.Math.Between(50, CONFIG.height - 50);
+                }
+                
+                // Check if this position is inside the title safe zone
+                isInSafeZone = (
+                    x > titleSafeZone.x && 
+                    x < titleSafeZone.x + titleSafeZone.width && 
+                    y > titleSafeZone.y && 
+                    y < titleSafeZone.y + titleSafeZone.height
+                );
+                
+                // Also avoid the instruction area
+                if (y > 350 && y < 580 && x > CONFIG.width / 2 - 250 && x < CONFIG.width / 2 + 250) {
+                    isInSafeZone = true;
+                }
             }
             
             // Add shape with animation

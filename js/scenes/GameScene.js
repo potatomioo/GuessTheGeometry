@@ -23,13 +23,13 @@ class GameScene extends Phaser.Scene {
         // Add background
         this.add.image(0, 0, 'background').setOrigin(0);
         
-        // Create HUD (heads-up display)
-        this.createHUD();
-        
         // Create conveyor belt
         this.createConveyorBelt();
         
-        // Create baskets - now all in one row at the bottom
+        // Create improved HUD (heads-up display)
+        this.createImprovedHUD();
+        
+        // Create baskets in one row at the bottom
         this.createBaskets();
         
         // Set up input handlers
@@ -96,57 +96,142 @@ class GameScene extends Phaser.Scene {
         }
     }
     
-    createHUD() {
-        // Create a semi-transparent panel for HUD elements
-        const hudPanel = this.add.rectangle(10, 70, 160, 120, 0x000000, 0.5)
-            .setOrigin(0, 0.5)
-            .setStrokeStyle(1, 0xffffff);
+    createImprovedHUD() {
+        // Create a translucent banner across the top for the level indicator
+        const topBanner = this.add.rectangle(
+            CONFIG.width / 2, 
+            30, 
+            200, 
+            50, 
+            0x000000, 
+            0.7
+        ).setOrigin(0.5, 0.5)
+        .setStrokeStyle(2, 0xffffff);
         
-        // Level indicator
+        // Level indicator in the center top
         this.levelText = this.add.text(
-            hudPanel.x + 10, 
-            hudPanel.y - 40, 
-            `Level: ${GAME_STATE.currentLevel}`, 
+            CONFIG.width / 2, 
+            30, 
+            `Level ${GAME_STATE.currentLevel}`, 
             { 
                 fontFamily: 'Arial',
-                fontSize: '24px',
+                fontSize: '28px',
                 fontStyle: 'bold',
                 color: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 2
+                align: 'center'
             }
-        ).setOrigin(0, 0.5);
+        ).setOrigin(0.5, 0.5);
+        
+        // Add a glow effect to the level text
+        this.levelText.setStroke('#4aff4a', 4);
+        this.levelText.setShadow(2, 2, '#000000', 2, true, true);
+        
+        // Create a score panel in the top left
+        const scorePanel = this.add.rectangle(
+            20, 
+            30, 
+            140, 
+            50, 
+            0x000000, 
+            0.7
+        ).setOrigin(0, 0.5)
+        .setStrokeStyle(2, 0xffff00);
         
         // Score display
         this.scoreText = this.add.text(
-            hudPanel.x + 10, 
-            hudPanel.y, 
+            scorePanel.x + 70, 
+            scorePanel.y, 
             `Score: ${GAME_STATE.score}`, 
             { 
                 fontFamily: 'Arial',
                 fontSize: '24px',
                 fontStyle: 'bold',
-                color: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 2
+                color: '#ffffff'
             }
-        ).setOrigin(0, 0.5);
+        ).setOrigin(0.5, 0.5);
+        
+        // Create a shapes panel below the score panel
+        const shapesPanel = this.add.rectangle(
+            20, 
+            80, 
+            140, 
+            50, 
+            0x000000, 
+            0.7
+        ).setOrigin(0, 0.5)
+        .setStrokeStyle(2, 0xff00ff);
         
         // Shapes remaining counter
         const shapesRemaining = GAME_STATE.shapesPerLevel - GAME_STATE.shapesProcessed;
         this.shapesRemainingText = this.add.text(
-            hudPanel.x + 10, 
-            hudPanel.y + 40, 
+            shapesPanel.x + 70, 
+            shapesPanel.y, 
             `Shapes: ${shapesRemaining}`, 
             { 
                 fontFamily: 'Arial',
                 fontSize: '24px',
                 fontStyle: 'bold',
-                color: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 2
+                color: '#ffffff'
             }
-        ).setOrigin(0, 0.5);
+        ).setOrigin(0.5, 0.5);
+        
+        // Add decorative elements
+        this.addHUDDecorations();
+    }
+    
+    addHUDDecorations() {
+        // Add a pulsing effect to the level indicator
+        this.tweens.add({
+            targets: this.levelText,
+            scale: { from: 1, to: 1.1 },
+            duration: 800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        
+        // Add some decorative shapes around the screen edges
+        const shapeTypes = ['shape_circle', 'shape_triangle', 'shape_square', 'shape_rectangle'];
+        const colors = SHAPE_COLORS;
+        
+        // Add small decorative shapes to the corners
+        for (let i = 0; i < 8; i++) {
+            const shapeKey = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            let x, y;
+            if (i < 2) {
+                // Top right corner
+                x = CONFIG.width - 20 - (i * 30);
+                y = 20 + (i * 20);
+            } else if (i < 4) {
+                // Bottom right corner
+                x = CONFIG.width - 20 - ((i-2) * 30);
+                y = CONFIG.height - 200 - ((i-2) * 20);
+            } else if (i < 6) {
+                // Top left corner (but not over the HUD)
+                x = 180 + ((i-4) * 30);
+                y = 20 + ((i-4) * 20);
+            } else {
+                // Bottom left corner
+                x = 20 + ((i-6) * 30);
+                y = CONFIG.height - 200 - ((i-6) * 20);
+            }
+            
+            const deco = this.add.image(x, y, shapeKey)
+                .setTint(color)
+                .setAlpha(0.3)
+                .setScale(0.5);
+                
+            // Add a subtle rotation animation
+            this.tweens.add({
+                targets: deco,
+                angle: 360,
+                duration: 10000 + (i * 2000),
+                repeat: -1,
+                ease: 'Linear'
+            });
+        }
     }
     
     updateShapesRemainingText() {
@@ -167,6 +252,29 @@ class GameScene extends Phaser.Scene {
         // Add top and bottom borders
         this.add.rectangle(CONFIG.width / 2, GAME_STATE.dishLineY - 40, CONFIG.width, 4, 0x333333);
         this.add.rectangle(CONFIG.width / 2, GAME_STATE.dishLineY + 40, CONFIG.width, 4, 0x333333);
+        
+        // Add some visual enhancements to the conveyor
+        for (let i = 0; i < 10; i++) {
+            // Add some highlight lines on the conveyor
+            const highlight = this.add.rectangle(
+                i * 80, 
+                GAME_STATE.dishLineY,
+                2,
+                80,
+                0xffffff,
+                0.2
+            );
+            
+            // Add some shadow lines
+            this.add.rectangle(
+                i * 80 + 4, 
+                GAME_STATE.dishLineY,
+                2,
+                80,
+                0x000000,
+                0.1
+            );
+        }
     }
     
     createBaskets() {
@@ -190,6 +298,26 @@ class GameScene extends Phaser.Scene {
             // Create the basket
             const basket = this.add.image(basketX, basketY, 'basket');
             
+            // Add a highlight effect to the basket
+            const highlight = this.add.rectangle(
+                basketX,
+                basketY - 55,
+                120,
+                10,
+                0xffffff,
+                0.3
+            ).setOrigin(0.5, 0.5);
+            
+            // Animate the highlight
+            this.tweens.add({
+                targets: highlight,
+                alpha: { from: 0.1, to: 0.5 },
+                duration: 1500,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            
             // Store basket properties for collision
             basket.x = basketX;
             basket.y = basketY;
@@ -201,20 +329,42 @@ class GameScene extends Phaser.Scene {
                 basketX, 
                 basketY - 20, 
                 `shape_${type}`
-            ).setTint(0xffffff).setAlpha(0.5).setScale(0.8);
+            ).setTint(0xffffff).setAlpha(0.6).setScale(0.8);
             
-            // Add label
-            this.add.text(
+            // Add an animation to the example shape
+            this.tweens.add({
+                targets: exampleShape,
+                y: basketY - 25,
+                duration: 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            
+            // Add label with better styling
+            const label = this.add.text(
                 basketX,
-                basketY + 25,
+                basketY + 30,
                 type.charAt(0).toUpperCase() + type.slice(1),
                 {
                     fontFamily: 'Arial',
                     fontSize: '20px',
                     fontStyle: 'bold',
-                    color: '#000000'
+                    color: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 3
                 }
             ).setOrigin(0.5);
+            
+            // Add a slight animation to the label
+            this.tweens.add({
+                targets: label,
+                scale: { from: 1, to: 1.05 },
+                duration: 1000 + (i * 200),
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
         }
     }
     
@@ -245,11 +395,15 @@ class GameScene extends Phaser.Scene {
                 // Store the shape as currently dragged
                 this.draggingShape = clickedShape;
                 
-                // Create a visual indicator by changing alpha
-                clickedShape.alpha = 0.7;
+                // Create a visual indicator by changing alpha and scaling up slightly
+                clickedShape.alpha = 0.8;
+                clickedShape.setScale(1.1);
                 
                 // Bring to front
                 clickedShape.depth = 100;
+                
+                // Add a subtle glow effect
+                clickedShape.setTint(0xffffaa);
             }
         });
         
@@ -267,8 +421,10 @@ class GameScene extends Phaser.Scene {
             if (this.draggingShape) {
                 const shape = this.draggingShape;
                 
-                // Reset alpha
+                // Reset visual effects
                 shape.alpha = 1;
+                shape.setScale(1);
+                shape.clearTint();
                 
                 // Check if shape is dropped on correct basket
                 let scored = false;
@@ -299,12 +455,14 @@ class GameScene extends Phaser.Scene {
                             GAME_STATE.shapesProcessed++;
                             this.updateShapesRemainingText();
                             
-                            // Visual feedback - scale down and destroy
+                            // Visual feedback - scale down and destroy with more elaborate animation
                             this.tweens.add({
                                 targets: shape,
                                 scaleX: 0,
                                 scaleY: 0,
-                                duration: 300,
+                                angle: 360,
+                                alpha: 0,
+                                duration: 400,
                                 onComplete: () => {
                                     const index = this.shapes.indexOf(shape);
                                     if (index > -1) {
@@ -322,8 +480,19 @@ class GameScene extends Phaser.Scene {
                                 this.sound.play('wrong');
                             }
                             
-                            // Return to its dish
-                            this.returnShapeToDish(shape);
+                            // Visual feedback for wrong basket
+                            this.tweens.add({
+                                targets: shape,
+                                angle: { from: -20, to: 20 },
+                                duration: 100,
+                                repeat: 3,
+                                yoyo: true,
+                                onComplete: () => {
+                                    shape.angle = 0;
+                                    // Return to its dish
+                                    this.returnShapeToDish(shape);
+                                }
+                            });
                         }
                         break;
                     }
@@ -346,6 +515,9 @@ class GameScene extends Phaser.Scene {
         
         // Give dish a unique ID
         dish.id = this.dishIdCounter++;
+        
+        // Add a subtle glow to the dish
+        dish.setTint(0xffffee);
         
         // Properties for the dish
         dish.hasShape = false; // Will be true when a shape is on it
@@ -380,6 +552,15 @@ class GameScene extends Phaser.Scene {
         // Ensure the shape is in front of the dish
         shape.setDepth(10);
         
+        // Add a subtle "pop-in" effect when the shape appears
+        shape.setScale(0.5);
+        this.tweens.add({
+            targets: shape,
+            scale: 1,
+            duration: 200,
+            ease: 'Back.easeOut'
+        });
+        
         // Add to shapes array
         this.shapes.push(shape);
         
@@ -394,11 +575,11 @@ class GameScene extends Phaser.Scene {
         // Mark the shape as being returned (to prevent picking it during animation)
         shape.isReturning = true;
         
-        // Animate return to dish
+        // Animate return to dish with a more interesting path
         this.tweens.add({
             targets: shape,
             x: dish.x,
-            y: dish.y - 25, // Position above the dish
+            y: { value: dish.y - 25, duration: 300, ease: 'Bounce.easeOut' },
             duration: 300,
             onComplete: () => {
                 shape.isReturning = false;
@@ -416,21 +597,32 @@ class GameScene extends Phaser.Scene {
     
     createStarEffect(x, y) {
         // Create stars burst effect on correct match
-        for (let i = 0; i < 5; i++) {
-            const star = this.add.image(x, y, 'star').setScale(0.5);
+        for (let i = 0; i < 8; i++) {
+            const star = this.add.image(x, y, 'star').setScale(0.3 + Math.random() * 0.3);
+            
+            // Random color tint for stars
+            star.setTint(
+                Phaser.Display.Color.GetColor(
+                    255, 
+                    200 + Math.floor(Math.random() * 55), 
+                    100 + Math.floor(Math.random() * 155)
+                )
+            );
             
             // Random direction
             const angle = Math.random() * Math.PI * 2;
-            const distance = 50 + Math.random() * 50;
+            const distance = 50 + Math.random() * 70;
             
-            // Animate star
+            // Animate star with rotation
             this.tweens.add({
                 targets: star,
                 x: x + Math.cos(angle) * distance,
                 y: y + Math.sin(angle) * distance,
                 alpha: 0,
                 scale: 0.1,
-                duration: 500,
+                angle: Math.random() * 360,
+                duration: 600 + Math.random() * 400,
+                ease: 'Cubic.easeOut',
                 onComplete: () => {
                     star.destroy();
                 }
@@ -449,10 +641,13 @@ class GameScene extends Phaser.Scene {
                 this.sound.play('levelComplete');
             }
             
+            // Show level complete effect
+            this.showLevelCompleteEffect();
+            
             // Check if this was the last level
             if (GAME_STATE.currentLevel >= GAME_STATE.maxLevel) {
                 // Game complete!
-                this.time.delayedCall(1000, () => {
+                this.time.delayedCall(1500, () => {
                     this.cameras.main.fade(500, 0, 0, 0);
                     this.time.delayedCall(500, () => {
                         this.scene.start('GameOverScene', { win: true });
@@ -464,7 +659,7 @@ class GameScene extends Phaser.Scene {
                 GAME_STATE.shapesProcessed = 0;
                 
                 // Transition to level complete scene
-                this.time.delayedCall(1000, () => {
+                this.time.delayedCall(1500, () => {
                     this.cameras.main.fade(500, 0, 0, 0);
                     this.time.delayedCall(500, () => {
                         this.scene.start('LevelCompleteScene');
@@ -472,5 +667,52 @@ class GameScene extends Phaser.Scene {
                 });
             }
         }
+    }
+    
+    showLevelCompleteEffect() {
+        // Create a level complete text with animation
+        const completeText = this.add.text(
+            CONFIG.width / 2,
+            CONFIG.height / 2,
+            'Level Complete!',
+            {
+                fontFamily: 'Arial',
+                fontSize: '48px',
+                fontStyle: 'bold',
+                color: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 6,
+                align: 'center'
+            }
+        ).setOrigin(0.5).setAlpha(0).setScale(0.5);
+        
+        // Animate the text
+        this.tweens.add({
+            targets: completeText,
+            alpha: 1,
+            scale: 1.2,
+            duration: 500,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                // Add some star effects around the text
+                for (let i = 0; i < 20; i++) {
+                    this.time.delayedCall(i * 50, () => {
+                        this.createStarEffect(
+                            CONFIG.width / 2 + (Math.random() * 200 - 100),
+                            CONFIG.height / 2 + (Math.random() * 100 - 50)
+                        );
+                    });
+                }
+                
+                // Scale down after a while
+                this.tweens.add({
+                    targets: completeText,
+                    alpha: 0,
+                    scale: 0.8,
+                    delay: 1000,
+                    duration: 300
+                });
+            }
+        });
     }
 }
