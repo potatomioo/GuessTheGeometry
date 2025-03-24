@@ -115,11 +115,16 @@ class MainMenuScene extends Phaser.Scene {
     startBackgroundMusic() {
         // Only try to play music if it exists in the cache
         if (this.cache.audio.exists('music')) {
-            if (!this.sound.get('music')) {
-                this.sound.add('music', { loop: true, volume: 0.5 });
-            }
-            if (!this.sound.get('music').isPlaying) {
-                this.sound.play('music');
+            // Creating a global music variable to be accessed across scenes
+            if (!this.game.registry.get('backgroundMusic')) {
+                const music = this.sound.add('music', { 
+                    loop: true, 
+                    volume: 0.5 
+                });
+                this.game.registry.set('backgroundMusic', music);
+                music.play();
+            } else if (!this.game.registry.get('backgroundMusic').isPlaying) {
+                this.game.registry.get('backgroundMusic').play();
             }
         }
     }

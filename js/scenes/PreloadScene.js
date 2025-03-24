@@ -13,12 +13,13 @@ class PreloadScene extends Phaser.Scene {
         this.loadImageWithErrorHandling('star', 'assets/images/star.png');
         
         // Load sounds with error handling
-        this.loadAudioWithErrorHandling('click', 'assets/sounds/click.mp3');
-        this.loadAudioWithErrorHandling('correct', 'assets/sounds/correct.mp3');
-        this.loadAudioWithErrorHandling('wrong', 'assets/sounds/wrong.mp3');
-        this.loadAudioWithErrorHandling('levelComplete', 'assets/sounds/level-complete.mp3');
-        this.loadAudioWithErrorHandling('gameOver', 'assets/sounds/game-over.mp3');
-        this.loadAudioWithErrorHandling('music', 'assets/sounds/music.mp3');
+        // Update these lines in the preload() method
+        this.loadAudioWithErrorHandling('correct', 'assets/audios/CorrectAnswer.mp3');
+        this.loadAudioWithErrorHandling('click', 'assets/audios/CorrectAnswer.mp3');
+        this.loadAudioWithErrorHandling('levelComplete', 'assets/audios/Complete.mp3');
+        this.loadAudioWithErrorHandling('wrong', 'assets/audios/WrongAnswer.mp3');
+        this.loadAudioWithErrorHandling('music', 'assets/audios/BGMusic.mp3');
+        this.loadAudioWithErrorHandling('gameOver', 'assets/audios/Complete.mp3');
         
         // Create color graphics for shapes
         this.createShapeGraphics();
