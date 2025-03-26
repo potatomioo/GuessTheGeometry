@@ -136,8 +136,8 @@ class LevelCompleteScene extends Phaser.Scene {
         
         // Allow space to continue as well
         this.input.keyboard.once('keydown-SPACE', () => {
-            if (this.cache.audio.exists('click')) {
-                this.sound.play('click');
+            if (this.cache.audio.exists('levelComplete')) {
+                this.sound.play('levelComplete');
             }
             this.startNextLevel();
         });

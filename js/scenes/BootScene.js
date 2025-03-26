@@ -63,6 +63,10 @@ class BootScene extends Phaser.Scene {
         resetGameState();
         
         // Move to preload scene
-        this.scene.start('PreloadScene');
+        this.sound.mute = false;
+    this.sound.volume = 1;
+    
+    // Move to preload scene
+    this.scene.start('PreloadScene');
     }
 }

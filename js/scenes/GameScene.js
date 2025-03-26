@@ -447,6 +447,7 @@ class GameScene extends Phaser.Scene {
                             if (this.cache.audio.exists('correct')) {
                                 this.sound.play('correct');
                             }
+                              
                             
                             // Visual feedback - shape shrinks and stars appear
                             this.createStarEffect(shape.x, shape.y);
