@@ -4,8 +4,10 @@ class LevelCompleteScene extends Phaser.Scene {
     }
 
     create() {
-        // Add background
-        this.add.image(0, 0, 'background').setOrigin(0);
+        // Add background (warehouse image)
+        this.add.image(CONFIG.width/2, CONFIG.height/2, 'background')
+            .setOrigin(0.5)
+            .setDisplaySize(CONFIG.width, CONFIG.height);
         
         // Level complete text with shadow
         const titleShadow = this.add.text(
@@ -142,6 +144,7 @@ class LevelCompleteScene extends Phaser.Scene {
             this.startNextLevel();
         });
     }
+    
     
     createDecorations() {
         // Add stars around the screen

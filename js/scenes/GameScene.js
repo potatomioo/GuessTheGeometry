@@ -20,8 +20,10 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        // Add background
-        this.add.image(0, 0, 'background').setOrigin(0);
+        // Add background (warehouse image) and ensure it covers the entire screen
+        this.add.image(CONFIG.width/2, CONFIG.height/2, 'background')
+            .setOrigin(0.5)
+            .setDisplaySize(CONFIG.width, CONFIG.height);
         
         // Create conveyor belt
         this.createConveyorBelt();
@@ -295,8 +297,12 @@ class GameScene extends Phaser.Scene {
                 .setTint(0x000000)
                 .setAlpha(0.3);
             
-            // Create the basket
+            // Create the basket (using the box.png now)
             const basket = this.add.image(basketX, basketY, 'basket');
+            
+            // Adjust the scale to better fit the game's UI
+            // The scale might need adjustment based on the actual box.png dimensions
+            basket.setScale(0.6);
             
             // Add a highlight effect to the basket
             const highlight = this.add.rectangle(

@@ -4,8 +4,10 @@ class MainMenuScene extends Phaser.Scene {
     }
 
     create() {
-        // Add background
-        this.add.image(0, 0, 'background').setOrigin(0);
+        // Add background (warehouse image)
+        this.add.image(CONFIG.width/2, CONFIG.height/2, 'background')
+            .setOrigin(0.5)
+            .setDisplaySize(CONFIG.width, CONFIG.height);
         
         // Define title area - a safe zone where shapes won't appear
         const titleSafeZone = {
@@ -61,7 +63,7 @@ class MainMenuScene extends Phaser.Scene {
                 align: 'center'
             }
         ).setOrigin(0.5);
-
+    
         // Create start button
         const startButton = this.createButton(
             CONFIG.width / 2,

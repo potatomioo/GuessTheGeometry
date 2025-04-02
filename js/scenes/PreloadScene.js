@@ -5,15 +5,16 @@ class PreloadScene extends Phaser.Scene {
 
     preload() {
         // Load game assets
-        this.loadImageWithErrorHandling('background', 'assets/images/background.png');
+        // Remove duplicate loading of background - using warehouse.jpg instead
+        this.loadImageWithErrorHandling('background', 'assets/images/background/warehouse.jpg');
         this.loadImageWithErrorHandling('conveyor', 'assets/images/conveyor.png');
         this.loadImageWithErrorHandling('dish', 'assets/images/dish.png');
         this.loadImageWithErrorHandling('button', 'assets/images/button.png');
-        this.loadImageWithErrorHandling('basket', 'assets/images/basket.png');
+        // Remove duplicate loading of basket - using box.png instead
+        this.loadImageWithErrorHandling('basket', 'assets/images/background/box.png');
         this.loadImageWithErrorHandling('star', 'assets/images/star.png');
         
         // Load sounds with error handling
-        // Update these lines in the preload() method
         this.loadAudioWithErrorHandling('correct', 'assets/audios/CorrectAnswer.mp3');
         this.loadAudioWithErrorHandling('click', 'assets/audios/CorrectAnswer.mp3');
         this.loadAudioWithErrorHandling('levelComplete', 'assets/audios/Complete.mp3');
